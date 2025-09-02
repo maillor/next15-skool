@@ -1,0 +1,48 @@
+### **Prompt pour la création d'une plateforme tout-en-un de type Skool**
+
+---
+
+**Objectif :** Développer une plateforme web modulaire pour la gestion de communautés, l'hébergement de formations et les interactions en temps réel, accessible via un abonnement payant.
+
+**Technologies :**
+* **Frontend & Backend :** Next.js (avec l'App Router pour le routage et les API Routes)
+* **Base de Données :** PostgreSQL ou MySQL
+* **ORM :** Prisma
+* **Authentification :** Clerk
+* **Temps Réel :** Socket.io
+* **Styling :** Tailwind CSS
+
+**Tâches à réaliser, étape par étape :**
+
+### **1. Initialisation et configuration**
+
+* Configure le projet Next.js en incluant TypeScript, ESLint et Tailwind CSS.
+* Installe Prisma et lie-le à la base de données. Définis les modèles pour les utilisateurs, les posts, les messages, les cours et les paiements.
+* Intègre Clerk pour la gestion complète de l'authentification (connexion, inscription, gestion de profil).
+
+### **2. Développement des modules principaux**
+
+* **Module 1 : Communauté (Le Fil d'Actualité)**
+    * Crée une interface utilisateur pour la publication de posts avec texte, images et vidéos.
+    * Implémente les fonctionnalités de commentaires, de "j'aime" et de mentions.
+    * Utilise Socket.io pour afficher les nouveaux posts et les interactions en temps réel, sans recharger la page.
+
+* **Module 2 : Formation (Le "Classroom")**
+    * Conçois une interface pour créer des modules de cours avec des leçons vidéo.
+    * Développe un système de suivi de progression pour chaque utilisateur.
+    * Configure un système de "drip content" pour débloquer les leçons en fonction de la progression ou d'une période de temps.
+
+* **Module 3 : Gamification & Monétisation**
+    * Crée un système de points et de niveaux basés sur l'activité des utilisateurs (publications, commentaires, etc.).
+    * Développe une page de "Leaderboard" pour afficher le classement des membres.
+    * Intègre un service de paiement comme Stripe pour gérer les abonnements des utilisateurs.
+
+### **3. Fonctions supplémentaires**
+
+* **Gestion de l'utilisateur :** Ajoute une page de profil utilisateur pour la modification des informations personnelles et de l'abonnement.
+* **Administration :** Développe un tableau de bord simple pour les créateurs, leur permettant de gérer les membres, de surveiller l'activité et d'envoyer des notifications à la communauté.
+* **Déploiement :** Prépare le projet pour la production et déploie-le sur Vercel.
+
+---
+
+Ce prompt vous donne une feuille de route complète. Laquelle de ces étapes vous semble la plus complexe ?
