@@ -1,48 +1,292 @@
-### **Prompt pour la création d'une plateforme tout-en-un de type Skool**
-
----
-
-**Objectif :** Développer une plateforme web modulaire pour la gestion de communautés, l'hébergement de formations et les interactions en temps réel, accessible via un abonnement payant.
-
-**Technologies :**
-* **Frontend & Backend :** Next.js (avec l'App Router pour le routage et les API Routes)
-* **Base de Données :** PostgreSQL ou MySQL
-* **ORM :** Prisma
-* **Authentification :** Clerk
-* **Temps Réel :** Socket.io
-* **Styling :** Tailwind CSS
-
-**Tâches à réaliser, étape par étape :**
-
-### **1. Initialisation et configuration**
-
-* Configure le projet Next.js en incluant TypeScript, ESLint et Tailwind CSS.
-* Installe Prisma et lie-le à la base de données. Définis les modèles pour les utilisateurs, les posts, les messages, les cours et les paiements.
-* Intègre Clerk pour la gestion complète de l'authentification (connexion, inscription, gestion de profil).
-
-### **2. Développement des modules principaux**
-
-* **Module 1 : Communauté (Le Fil d'Actualité)**
-    * Crée une interface utilisateur pour la publication de posts avec texte, images et vidéos.
-    * Implémente les fonctionnalités de commentaires, de "j'aime" et de mentions.
-    * Utilise Socket.io pour afficher les nouveaux posts et les interactions en temps réel, sans recharger la page.
-
-* **Module 2 : Formation (Le "Classroom")**
-    * Conçois une interface pour créer des modules de cours avec des leçons vidéo.
-    * Développe un système de suivi de progression pour chaque utilisateur.
-    * Configure un système de "drip content" pour débloquer les leçons en fonction de la progression ou d'une période de temps.
-
-* **Module 3 : Gamification & Monétisation**
-    * Crée un système de points et de niveaux basés sur l'activité des utilisateurs (publications, commentaires, etc.).
-    * Développe une page de "Leaderboard" pour afficher le classement des membres.
-    * Intègre un service de paiement comme Stripe pour gérer les abonnements des utilisateurs.
-
-### **3. Fonctions supplémentaires**
-
-* **Gestion de l'utilisateur :** Ajoute une page de profil utilisateur pour la modification des informations personnelles et de l'abonnement.
-* **Administration :** Développe un tableau de bord simple pour les créateurs, leur permettant de gérer les membres, de surveiller l'activité et d'envoyer des notifications à la communauté.
-* **Déploiement :** Prépare le projet pour la production et déploie-le sur Vercel.
-
----
-
-Ce prompt vous donne une feuille de route complète. Laquelle de ces étapes vous semble la plus complexe ?
+{
+  "database_name": "skool_moneroo_clerk_local_video",
+  "engine": "InnoDB",
+  "charset": "utf8mb4",
+  "collation": "utf8mb4_unicode_ci",
+  "tables": [
+    {
+      "name": "users",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "clerk_user_id", "type": "VARCHAR", "length": 255, "not_null": true, "unique": true},
+        {"name": "username", "type": "VARCHAR", "length": 50, "not_null": true, "unique": true},
+        {"name": "email", "type": "VARCHAR", "length": 100, "not_null": true, "unique": true},
+        {"name": "first_name", "type": "VARCHAR", "length": 50, "not_null": false},
+        {"name": "last_name", "type": "VARCHAR", "length": 50, "not_null": false},
+        {"name": "avatar_url", "type": "VARCHAR", "length": 255, "not_null": false},
+        {"name": "bio", "type": "TEXT", "not_null": false},
+        {"name": "role", "type": "ENUM('student', 'instructor', 'admin')", "default": "'student'"},
+        {"name": "is_active", "type": "BOOLEAN", "default": true},
+        {"name": "video_preferences", "type": "JSON", "not_null": false, "comment": "Préférences vidéo (résolution, bande passante)"},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"},
+        {"name": "updated_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP", "on_update": "CURRENT_TIMESTAMP"}
+      ]
+    },
+    {
+      "name": "video_sessions",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "title", "type": "VARCHAR", "length": 255, "not_null": true},
+        {"name": "description", "type": "TEXT", "not_null": false},
+        {"name": "host_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "users(id)"},
+        {"name": "community_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "communities(id)", "comment": "Communauté du créateur (seuls notifiés)"},
+        {"name": "course_id", "type": "INT", "length": 11, "unsigned": true, "not_null": false, "foreign_key": "courses(id)"},
+        {"name": "lesson_id", "type": "INT", "length": 11, "unsigned": true, "not_null": false, "foreign_key": "lessons(id)"},
+        {"name": "scheduled_at", "type": "DATETIME", "not_null": true},
+        {"name": "duration", "type": "INT", "length": 11, "not_null": true, "comment": "Durée en minutes"},
+        {"name": "provider", "type": "ENUM('local_webrtc', 'jitsi_local')", "default": "'local_webrtc'"},
+        {"name": "room_code", "type": "VARCHAR", "length": 20, "not_null": true, "unique": true, "comment": "Code d'accès unique à la salle"},
+        {"name": "server_url", "type": "VARCHAR", "length": 255, "not_null": false, "comment": "URL du serveur local"},
+        {"name": "status", "type": "ENUM('scheduled', 'live', 'ended', 'cancelled')", "default": "'scheduled'"},
+        {"name": "max_participants", "type": "INT", "length": 11, "default": "50"},
+        {"name": "requires_enrollment", "type": "BOOLEAN", "default": true},
+        {"name": "recording_enabled", "type": "BOOLEAN", "default": true},
+        {"name": "recording_path", "type": "VARCHAR", "length": 512, "not_null": false, "comment": "Chemin local de l'enregistrement"},
+        {"name": "webrtc_config", "type": "JSON", "not_null": false, "comment": "Configuration WebRTC (ICE, TURN/STUN)"},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"},
+        {"name": "updated_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP", "on_update": "CURRENT_TIMESTAMP"}
+      ],
+      "indexes": [
+        {"name": "idx_community_id", "columns": ["community_id"], "type": "INDEX"},
+        {"name": "idx_room_code", "columns": ["room_code"], "type": "UNIQUE"},
+        {"name": "idx_scheduled_at", "columns": ["scheduled_at"], "type": "INDEX"}
+      ]
+    },
+    {
+      "name": "webrtc_servers",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "name", "type": "VARCHAR", "length": 100, "not_null": true},
+        {"name": "type", "type": "ENUM('stun', 'turn', 'signaling')", "not_null": true},
+        {"name": "url", "type": "VARCHAR", "length": 255, "not_null": true},
+        {"name": "username", "type": "VARCHAR", "length": 100, "not_null": false, "comment": "Pour TURN"},
+        {"name": "credential", "type": "VARCHAR", "length": 255, "not_null": false, "comment": "Pour TURN"},
+        {"name": "is_active", "type": "BOOLEAN", "default": true},
+        {"name": "priority", "type": "INT", "length": 11, "default": "1", "comment": "Ordre de priorité"},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"}
+      ],
+      "indexes": [
+        {"name": "idx_type_priority", "columns": ["type", "priority"], "type": "INDEX"}
+      ]
+    },
+    {
+      "name": "video_participants",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "session_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "video_sessions(id)"},
+        {"name": "user_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "users(id)"},
+        {"name": "role", "type": "ENUM('host', 'moderator', 'participant')", "default": "'participant'"},
+        {"name": "peer_id", "type": "VARCHAR", "length": 100, "not_null": false, "comment": "ID WebRTC du participant"},
+        {"name": "joined_at", "type": "DATETIME", "not_null": false},
+        {"name": "left_at", "type": "DATETIME", "not_null": false},
+        {"name": "status", "type": "ENUM('invited', 'connected', 'disconnected', 'rejected')", "default": "'invited'"},
+        {"name": "connection_info", "type": "JSON", "not_null": false, "comment": "Infos de connexion (IP, navigateur, etc.)"},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"}
+      ],
+      "indexes": [
+        {"name": "idx_session_user", "columns": ["session_id", "user_id"], "type": "UNIQUE"},
+        {"name": "idx_peer_id", "columns": ["peer_id"], "type": "INDEX"}
+      ]
+    },
+    {
+      "name": "video_recordings",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "session_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "video_sessions(id)"},
+        {"name": "filename", "type": "VARCHAR", "length": 255, "not_null": true},
+        {"name": "file_path", "type": "VARCHAR", "length": 512, "not_null": true},
+        {"name": "file_size", "type": "BIGINT", "not_null": false, "comment": "Taille en octets"},
+        {"name": "duration", "type": "INT", "length": 11, "not_null": false, "comment": "Durée en secondes"},
+        {"name": "format", "type": "VARCHAR", "length": 10, "not_null": true, "comment": "webm, mp4, etc."},
+        {"name": "status", "type": "ENUM('recording', 'processing', 'available', 'failed')", "default": "'recording'"},
+        {"name": "thumbnail_path", "type": "VARCHAR", "length": 512, "not_null": false},
+        {"name": "metadata", "type": "JSON", "not_null": false, "comment": "Métadonnées techniques"},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"},
+        {"name": "updated_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP", "on_update": "CURRENT_TIMESTAMP"}
+      ],
+      "indexes": [
+        {"name": "idx_session_id", "columns": ["session_id"], "type": "INDEX"},
+        {"name": "idx_status", "columns": ["status"], "type": "INDEX"}
+      ]
+    },
+    {
+      "name": "video_notifications",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "session_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "video_sessions(id)"},
+        {"name": "community_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "communities(id)"},
+        {"name": "user_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "users(id)"},
+        {"name": "type", "type": "ENUM('scheduled', 'starting_soon', 'starting_now', 'cancelled', 'recording_ready')", "not_null": true},
+        {"name": "sent_via", "type": "ENUM('email', 'in_app', 'push')", "not_null": true},
+        {"name": "status", "type": "ENUM('pending', 'sent', 'delivered', 'failed')", "default": "'pending'"},
+        {"name": "sent_at", "type": "DATETIME", "not_null": false},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"}
+      ],
+      "indexes": [
+        {"name": "idx_session_user", "columns": ["session_id", "user_id"], "type": "UNIQUE"},
+        {"name": "idx_community_id", "columns": ["community_id"], "type": "INDEX"}
+      ]
+    },
+    {
+      "name": "communities",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "name", "type": "VARCHAR", "length": 100, "not_null": true},
+        {"name": "slug", "type": "VARCHAR", "length": 100, "not_null": true, "unique": true},
+        {"name": "description", "type": "TEXT", "not_null": false},
+        {"name": "owner_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "users(id)"},
+        {"name": "is_public", "type": "BOOLEAN", "default": true},
+        {"name": "moneroo_payment_enabled", "type": "BOOLEAN", "default": false},
+        {"name": "video_enabled", "type": "BOOLEAN", "default": true},
+        {"name": "local_server_config", "type": "JSON", "not_null": false, "comment": "Configuration serveur local spécifique"},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"},
+        {"name": "updated_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP", "on_update": "CURRENT_TIMESTAMP"}
+      ]
+    },
+    {
+      "name": "community_members",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "community_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "communities(id)"},
+        {"name": "user_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "users(id)"},
+        {"name": "role", "type": "ENUM('member', 'moderator', 'admin')", "default": "'member'"},
+        {"name": "video_notifications_enabled", "type": "BOOLEAN", "default": true},
+        {"name": "joined_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"},
+        {"unique": ["community_id", "user_id"]}
+      ]
+    },
+    {
+      "name": "courses",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "community_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "communities(id)"},
+        {"name": "title", "type": "VARCHAR", "length": 255, "not_null": true},
+        {"name": "description", "type": "TEXT", "not_null": false},
+        {"name": "instructor_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "users(id)"},
+        {"name": "price", "type": "DECIMAL", "length": "10,2", "default": "0.00"},
+        {"name": "currency", "type": "VARCHAR", "length": 3, "default": "'XAF'"},
+        {"name": "status", "type": "ENUM('draft', 'published', 'archived')", "default": "'draft'"},
+        {"name": "video_sessions_enabled", "type": "BOOLEAN", "default": true},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"},
+        {"name": "updated_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP", "on_update": "CURRENT_TIMESTAMP"}
+      ]
+    },
+    {
+      "name": "modules",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "course_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "courses(id)"},
+        {"name": "title", "type": "VARCHAR", "length": 255, "not_null": true},
+        {"name": "order_index", "type": "INT", "length": 11, "not_null": true},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"},
+        {"name": "updated_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP", "on_update": "CURRENT_TIMESTAMP"}
+      ]
+    },
+    {
+      "name": "lessons",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "module_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "modules(id)"},
+        {"name": "title", "type": "VARCHAR", "length": 255, "not_null": true},
+        {"name": "content_type", "type": "ENUM('text', 'video', 'quiz', 'assignment', 'live_session')", "not_null": true},
+        {"name": "content", "type": "LONGTEXT", "not_null": false},
+        {"name": "video_url", "type": "VARCHAR", "length": 255, "not_null": false},
+        {"name": "video_session_id", "type": "INT", "length": 11, "unsigned": true, "not_null": false, "foreign_key": "video_sessions(id)"},
+        {"name": "order_index", "type": "INT", "length": 11, "not_null": true},
+        {"name": "is_free", "type": "BOOLEAN", "default": false},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"},
+        {"name": "updated_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP", "on_update": "CURRENT_TIMESTAMP"}
+      ]
+    },
+    {
+      "name": "moneroo_payment_methods",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "method_name", "type": "VARCHAR", "length": 50, "not_null": true},
+        {"name": "moneroo_method_id", "type": "VARCHAR", "length": 100, "not_null": true, "unique": true},
+        {"name": "is_active", "type": "BOOLEAN", "default": true},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"}
+      ]
+    },
+    {
+      "name": "moneroo_transactions",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "user_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "users(id)"},
+        {"name": "course_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "courses(id)"},
+        {"name": "moneroo_transaction_id", "type": "VARCHAR", "length": 255, "not_null": true, "unique": true},
+        {"name": "payment_method_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "moneroo_payment_methods(id)"},
+        {"name": "amount", "type": "DECIMAL", "length": "10,2", "not_null": true},
+        {"name": "currency", "type": "VARCHAR", "length": 3, "not_null": true},
+        {"name": "status", "type": "ENUM('pending', 'completed', 'failed', 'refunded')", "default": "'pending'"},
+        {"name": "moneroo_response", "type": "JSON", "not_null": false},
+        {"name": "webhook_received", "type": "BOOLEAN", "default": false},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"},
+        {"name": "updated_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP", "on_update": "CURRENT_TIMESTAMP"}
+      ]
+    },
+    {
+      "name": "webhooks_moneroo",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "event_type", "type": "VARCHAR", "length": 50, "not_null": true},
+        {"name": "moneroo_transaction_id", "type": "VARCHAR", "length": 255, "not_null": true},
+        {"name": "payload", "type": "JSON", "not_null": true},
+        {"name": "processed", "type": "BOOLEAN", "default": false},
+        {"name": "processed_at", "type": "DATETIME", "not_null": false},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"}
+      ]
+    },
+    {
+      "name": "clerk_webhooks",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "clerk_event_id", "type": "VARCHAR", "length": 255, "not_null": true, "unique": true},
+        {"name": "event_type", "type": "VARCHAR", "length": 50, "not_null": true},
+        {"name": "payload", "type": "JSON", "not_null": true},
+        {"name": "processed", "type": "BOOLEAN", "default": false},
+        {"name": "processed_at", "type": "DATETIME", "not_null": false},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"}
+      ]
+    },
+    {
+      "name": "enrollments",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "user_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "users(id)"},
+        {"name": "course_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "courses(id)"},
+        {"name": "moneroo_transaction_id", "type": "VARCHAR", "length": 255, "not_null": false, "foreign_key": "moneroo_transactions(moneroo_transaction_id)"},
+        {"name": "enrolled_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"},
+        {"name": "completed_at", "type": "DATETIME", "not_null": false},
+        {"name": "progress", "type": "DECIMAL", "length": "5,2", "default": "0.00"},
+        {"name": "last_accessed_at", "type": "DATETIME", "not_null": false},
+        {"unique": ["user_id", "course_id"]}
+      ]
+    },
+    {
+      "name": "discussions",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "community_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "communities(id)"},
+        {"name": "user_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "users(id)"},
+        {"name": "title", "type": "VARCHAR", "length": 255, "not_null": true},
+        {"name": "content", "type": "TEXT", "not_null": true},
+        {"name": "is_pinned", "type": "BOOLEAN", "default": false},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"},
+        {"name": "updated_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP", "on_update": "CURRENT_TIMESTAMP"}
+      ]
+    },
+    {
+      "name": "comments",
+      "columns": [
+        {"name": "id", "type": "INT", "length": 11, "unsigned": true, "auto_increment": true, "primary": true},
+        {"name": "user_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "users(id)"},
+        {"name": "discussion_id", "type": "INT", "length": 11, "unsigned": true, "not_null": true, "foreign_key": "discussions(id)"},
+        {"name": "parent_id", "type": "INT", "length": 11, "unsigned": true, "not_null": false, "foreign_key": "comments(id)"},
+        {"name": "content", "type": "TEXT", "not_null": true},
+        {"name": "created_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP"},
+        {"name": "updated_at", "type": "TIMESTAMP", "default": "CURRENT_TIMESTAMP", "on_update": "CURRENT_TIMESTAMP"}
+      ]
+    }
+  ]
+}
