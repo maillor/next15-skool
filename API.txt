@@ -1,0 +1,198 @@
+
+
+Voici la liste complète des endpoints de l'API avec leurs rôles, organisés par fonctionnalité :
+
+### 🔐 **Authentification (Clerk Integration)**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `POST` | `/webhooks/clerk` | Réception des webhooks Clerk (création/mise à jour/suppression utilisateurs) |
+| `GET` | `/auth/me` | Récupérer les infos de l'utilisateur connecté |
+| `POST` | `/auth/sync` | Synchroniser manuellement un utilisateur avec Clerk |
+| `DELETE` | `/auth/logout` | Déconnexion de l'utilisateur |
+
+### 👥 **Utilisateurs**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `GET` | `/users` | Lister tous les utilisateurs (admin) |
+| `GET` | `/users/{id}` | Récupérer un utilisateur par ID |
+| `PUT` | `/users/{id}` | Mettre à jour le profil utilisateur |
+| `PUT` | `/users/{id}/preferences` | Mettre à jour les préférences vidéo |
+| `GET` | `/users/{id}/communities` | Lister les communautés d'un utilisateur |
+
+### 🏘️ **Communautés**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `GET` | `/communities` | Lister toutes les communautés |
+| `POST` | `/communities` | Créer une nouvelle communauté |
+| `GET` | `/communities/{id}` | Récupérer une communauté par ID |
+| `PUT` | `/communities/{id}` | Mettre à jour une communauté |
+| `DELETE` | `/communities/{id}` | Supprimer une communauté |
+| `GET` | `/communities/{id}/members` | Lister les membres d'une communauté |
+| `POST` | `/communities/{id}/join` | Rejoindre une communauté |
+| `DELETE` | `/communities/{id}/leave` | Quitter une communauté |
+| `PUT` | `/communities/{id}/members/{userId}/role` | Modifier le rôle d'un membre |
+
+### 📚 **Cours**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `GET` | `/courses` | Lister tous les cours |
+| `POST` | `/courses` | Créer un nouveau cours |
+| `GET` | `/courses/{id}` | Récupérer un cours par ID |
+| `PUT` | `/courses/{id}` | Mettre à jour un cours |
+| `DELETE` | `/courses/{id}` | Supprimer un cours |
+| `GET` | `/communities/{id}/courses` | Lister les cours d'une communauté |
+| `POST` | `/courses/{id}/publish` | Publier un cours |
+| `POST` | `/courses/{id}/archive` | Archiver un cours |
+
+### 📖 **Modules**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `GET` | `/courses/{courseId}/modules` | Lister les modules d'un cours |
+| `POST` | `/courses/{courseId}/modules` | Créer un nouveau module |
+| `PUT` | `/modules/{id}` | Mettre à jour un module |
+| `DELETE` | `/modules/{id}` | Supprimer un module |
+| `PUT` | `/modules/{id}/reorder` | Réorganiser les modules |
+
+### 🎯 **Leçons**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `GET` | `/modules/{moduleId}/lessons` | Lister les leçons d'un module |
+| `POST` | `/modules/{moduleId}/lessons` | Créer une nouvelle leçon |
+| `GET` | `/lessons/{id}` | Récupérer une leçon par ID |
+| `PUT` | `/lessons/{id}` | Mettre à jour une leçon |
+| `DELETE` | `/lessons/{id}` | Supprimer une leçon |
+| `PUT` | `/lessons/{id}/reorder` | Réorganiser les leçons |
+| `POST` | `/lessons/{id}/complete` | Marquer une leçon comme terminée |
+
+### 💳 **Paiements (Moneroo)**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `POST` | `/payments/initiate` | Initier un paiement Moneroo |
+| `GET` | `/payments/{id}` | Récupérer les détails d'un paiement |
+| `GET` | `/users/{userId}/payments` | Lister les paiements d'un utilisateur |
+| `POST` | `/payments/{id}/refund` | Rembourser un paiement |
+| `POST` | `/webhooks/moneroo` | Réception des webhooks Moneroo |
+| `GET` | `/payment-methods` | Lister les méthodes de paiement disponibles |
+
+### 📝 **Inscriptions**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `GET` | `/enrollments` | Lister toutes les inscriptions |
+| `POST` | `/courses/{courseId}/enroll` | S'inscrire à un cours |
+| `GET` | `/users/{userId}/enrollments` | Lister les inscriptions d'un utilisateur |
+| `GET` | `/courses/{courseId}/enrollments` | Lister les inscrits à un cours |
+| `DELETE` | `/enrollments/{id}` | Annuler une inscription |
+| `GET` | `/enrollments/{id}/progress` | Récupérer la progression d'une inscription |
+
+### 💬 **Discussions**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `GET` | `/communities/{id}/discussions` | Lister les discussions d'une communauté |
+| `POST` | `/communities/{id}/discussions` | Créer une nouvelle discussion |
+| `GET` | `/discussions/{id}` | Récupérer une discussion par ID |
+| `PUT` | `/discussions/{id}` | Mettre à jour une discussion |
+| `DELETE` | `/discussions/{id}` | Supprimer une discussion |
+| `PUT` | `/discussions/{id}/pin` | Épingler/désépingler une discussion |
+| `POST` | `/discussions/{id}/comments` | Ajouter un commentaire à une discussion |
+
+### 💭 **Commentaires**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `GET` | `/discussions/{id}/comments` | Lister les commentaires d'une discussion |
+| `POST` | `/discussions/{id}/comments` | Créer un nouveau commentaire |
+| `GET` | `/comments/{id}` | Récupérer un commentaire par ID |
+| `PUT` | `/comments/{id}` | Mettre à jour un commentaire |
+| `DELETE` | `/comments/{id}` | Supprimer un commentaire |
+| `GET` | `/comments/{id}/replies` | Lister les réponses à un commentaire |
+
+### 🎥 **Visioconférence**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `GET` | `/video/sessions` | Lister toutes les sessions vidéo |
+| `POST` | `/video/sessions` | Créer une nouvelle session vidéo |
+| `GET` | `/video/sessions/{id}` | Récupérer une session vidéo par ID |
+| `PUT` | `/video/sessions/{id}` | Mettre à jour une session vidéo |
+| `DELETE` | `/video/sessions/{id}` | Supprimer une session vidéo |
+| `POST` | `/video/sessions/{id}/start` | Démarrer une session vidéo |
+| `POST` | `/video/sessions/{id}/end` | Terminer une session vidéo |
+| `GET` | `/video/sessions/{code}/join` | Rejoindre une session par code |
+| `POST` | `/video/sessions/{id}/invite` | Inviter des participants |
+| `GET` | `/video/sessions/{id}/participants` | Lister les participants d'une session |
+| `POST` | `/video/sessions/{id}/recording/start` | Démarrer l'enregistrement |
+| `POST` | `/video/sessions/{id}/recording/stop` | Arrêter l'enregistrement |
+| `GET` | `/video/recordings` | Lister tous les enregistrements |
+| `GET` | `/video/recordings/{id}` | Récupérer un enregistrement par ID |
+| `GET` | `/video/recordings/{id}/download` | Télécharger un enregistrement |
+| `GET` | `/communities/{id}/video-sessions` | Lister les sessions vidéo d'une communauté |
+| `GET` | `/courses/{id}/video-sessions` | Lister les sessions vidéo d'un cours |
+
+### 🔔 **Notifications Vidéo**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `GET` | `/video/notifications` | Lister les notifications vidéo d'un utilisateur |
+| `POST` | `/video/notifications/{id}/read` | Marquer une notification comme lue |
+| `GET` | `/video/sessions/{id}/notifications` | Lister les notifications d'une session |
+| `POST` | `/video/sessions/{id}/notify` | Envoyer des notifications aux membres |
+
+### ⚙️ **Configuration Système**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `GET` | `/webrtc/servers` | Lister les serveurs WebRTC configurés |
+| `POST` | `/webrtc/servers` | Ajouter un serveur WebRTC |
+| `PUT` | `/webrtc/servers/{id}` | Mettre à jour un serveur WebRTC |
+| `DELETE` | `/webrtc/servers/{id}` | Supprimer un serveur WebRTC |
+| `GET` | `/system/health` | Vérifier l'état du système |
+| `GET` | `/system/stats` | Récupérer les statistiques du système |
+
+### 📊 **Analytics & Rapports**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `GET` | `/analytics/courses` | Statistiques des cours |
+| `GET` | `/analytics/users` | Statistiques des utilisateurs |
+| `GET` | `/analytics/payments` | Statistiques des paiements |
+| `GET` | `/analytics/video-sessions` | Statistiques des sessions vidéo |
+| `GET` | `/reports/engagement` | Rapport d'engagement des utilisateurs |
+| `GET` | `/reports/revenue` | Rapport de revenus |
+
+### 🔍 **Recherche**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `GET` | `/search/courses` | Rechercher des cours |
+| `GET` | `/search/communities` | Rechercher des communautés |
+| `GET` | `/search/users` | Rechercher des utilisateurs |
+| `GET` | `/search/discussions` | Rechercher des discussions |
+
+### 📁 **Gestion des Fichiers**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `POST` | `/upload/avatar` | Télécharger un avatar |
+| `POST` | `/upload/course-image` | Télécharger une image de cours |
+| `POST` | `/upload/video-thumbnail` | Télécharger une miniature vidéo |
+| `DELETE` | `/files/{id}` | Supprimer un fichier |
+
+### 🔌 **WebSocket Endpoints (Signalisation Vidéo)**
+| Événement | Rôle |
+|-----------|------|
+| `join` | Rejoindre une salle vidéo |
+| `leave` | Quitter une salle vidéo |
+| `offer` | Envoyer une offre WebRTC |
+| `answer` | Envoyer une réponse WebRTC |
+| `ice-candidate` | Échanger les candidats ICE |
+| `start-recording` | Démarrer l'enregistrement |
+| `stop-recording` | Arrêter l'enregistrement |
+| `chat-message` | Envoyer un message de chat |
+| `raise-hand` | Lever la main |
+| `screen-share` | Partager l'écran |
+
+### 🛡️ **Endpoints Admin**
+| Méthode | Endpoint | Rôle |
+|---------|----------|------|
+| `GET` | `/admin/users` | Lister tous les utilisateurs (admin) |
+| `PUT` | `/admin/users/{id}/status` | Activer/désactiver un utilisateur |
+| `GET` | `/admin/communities` | Lister toutes les communautés (admin) |
+| `DELETE` | `/admin/communities/{id}` | Supprimer une communauté (admin) |
+| `GET` | `/admin/payments` | Lister tous les paiements (admin) |
+| `POST` | `/admin/system/maintenance` | Activer le mode maintenance |
+| `GET` | `/admin/logs` | Consulter les logs système |
+
+Cette structure d'API couvre toutes les fonctionnalités de la plateforme avec une organisation claire et des rôles bien définis pour chaque endpoint.
